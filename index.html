@@ -2330,16 +2330,9 @@
                     const detailBtn = document.createElement('button');
                     detailBtn.className = 'detail-btn';
                     detailBtn.innerHTML = '💡';
-                    detailBtn.onclick = (e) => {
-                        e.preventDefault();
-                        toggleDetail(detailBtn, riskId, category, subcategory, risk.name);
-                    };
-
-                    riskName.appendChild(prioritySelect);
-                    riskName.appendChild(detailBtn);
-
-                    infoDiv.appendChild(riskName);
-
+                    detailBtn.type = 'button';
+                    
+                    // 詳細パネルの参照をボタンに保持する
                     const detailPanel = document.createElement('div');
                     detailPanel.className = 'risk-detail-panel';
                     detailPanel.style.display = 'none';
@@ -2349,8 +2342,29 @@
                     detailPanel.style.borderLeft = '4px solid #3498db';
                     detailPanel.style.whiteSpace = 'pre-wrap';
                     detailPanel.style.wordWrap = 'break-word';
+                    detailPanel.style.lineHeight = '1.6';
+                    
                     const explanation = getRiskExplanation(category, subcategory, risk.name);
-                    detailPanel.textContent = explanation || 'この項目の詳細説明はまだ登録されていません。';
+                    detailPanel.textContent = explanation || '詳細説明がありません。';
+                    
+                    // ボタンをクリックしたときの処理
+                    detailBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // detailPanelのdisplayを切り替え
+                        if (detailPanel.style.display === 'none') {
+                            detailPanel.style.display = 'block';
+                            detailBtn.style.color = '#e74c3c';
+                        } else {
+                            detailPanel.style.display = 'none';
+                            detailBtn.style.color = 'inherit';
+                        }
+                    };
+
+                    riskName.appendChild(prioritySelect);
+                    riskName.appendChild(detailBtn);
+
+                    infoDiv.appendChild(riskName);
                     infoDiv.appendChild(detailPanel);
 
                     item.appendChild(infoDiv);
