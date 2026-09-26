@@ -2342,8 +2342,15 @@
 
                     const detailPanel = document.createElement('div');
                     detailPanel.className = 'risk-detail-panel';
+                    detailPanel.style.display = 'none';
+                    detailPanel.style.padding = '10px';
+                    detailPanel.style.marginTop = '10px';
+                    detailPanel.style.backgroundColor = '#f9f9f9';
+                    detailPanel.style.borderLeft = '4px solid #3498db';
+                    detailPanel.style.whiteSpace = 'pre-wrap';
+                    detailPanel.style.wordWrap = 'break-word';
                     const explanation = getRiskExplanation(category, subcategory, risk.name);
-                    detailPanel.innerHTML = explanation || 'この項目の詳細説明はまだ登録されていません。';
+                    detailPanel.textContent = explanation || 'この項目の詳細説明はまだ登録されていません。';
                     infoDiv.appendChild(detailPanel);
 
                     item.appendChild(infoDiv);
@@ -2388,7 +2395,15 @@
         function toggleDetail(btn, riskId, category, subcategory, riskName) {
             const panel = btn.parentElement?.parentElement?.querySelector('.risk-detail-panel');
             if (panel) {
-                panel.classList.toggle('visible');
+                // 詳細説明を取得して表示
+                const explanation = getRiskExplanation(category, subcategory, riskName);
+                if (explanation) {
+                    panel.textContent = explanation;
+                    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+                } else {
+                    panel.textContent = '詳細説明がありません。';
+                    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+                }
             }
         }
 
