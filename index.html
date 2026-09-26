@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ リスク管理ツール - 統合リスク評価システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #e67e22;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --high: #ffc107;
+            --medium: #3498db;
+            --low: #27ae60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        body.dark-mode {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 10px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.5em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px 0;
+            border-bottom: 3px solid #3498db;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        body.dark-mode header h1 {
+            color: #3498db;
+        }
+
+        header p {
+            font-size: 1.1em;
+            color: #7f8c8d;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        body.dark-mode .toolbar {
+            background: #2a2a2a;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        body.dark-mode .search-box input {
+            background: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-warning {
+            background: #e67e22;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d35400;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        body.dark-mode .stat-card {
+            background: #2a2a2a;
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .content {
+            background: #2a2a2a;
+        }
+
+        .filter-info {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: #e8f4f8;
+            border-left: 3px solid #3498db;
+            border-radius: 4px;
+            display: none;
+        }
+
+        body.dark-mode .filter-info {
+            background: #1a3a3a;
+        }
+
+        .filter-info.active {
+            display: block;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .category-tab {
+            padding: 10px 20px;
+            background: #ecf0f1;
+            border: 2px solid #ddd;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .category-tab.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .category-tab:hover {
+            background: #d5dbdb;
+        }
+
+        body.dark-mode .category-tab {
+            background: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .category-tab.active {
+            background: #3498db;
+        }
+
+        .subcategory-group {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        body.dark-mode .subcategory-group {
+            border-color: #444;
+        }
+
+        .subcategory-header {
+            background: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .subcategory-header {
+            background: #3a3a3a;
+            border-color: #444;
+        }
+
+        .subcategory-header:hover {
+            background: #e9ecef;
+        }
+
+        body.dark-mode .subcategory-header:hover {
+            background: #444;
+        }
+
+        .subcategory-header.expanded {
+            background: #e3f2fd;
+        }
+
+        body.dark-mode .subcategory-header.expanded {
+            background: #1a4a6a;
+        }
+
+        .subcategory-content {
+            padding: 15px;
+            display: none;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        body.dark-mode .subcategory-content {
+            background: #2a2a2a;
+            border-top-color: #444;
+        }
+
+        .subcategory-content.open {
+            display: block;
+        }
+
+        .subcategory-explanation {
+            background: #e3f2fd;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #2196f3;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #1565c0;
+        }
+
+        body.dark-mode .subcategory-explanation {
+            background: #1a3a5a;
+            border-left-color: #64b5f6;
+            color: #90caf9;
+        }
+
+        .risk-item {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            align-items: flex-start;
+            background: #fff;
+        }
+
+        body.dark-mode .risk-item {
+            background: #3a3a3a;
+            border-color: #555;
+        }
+
+        .risk-item.high-priority {
+            background: #fffbf0;
+            border-left: 3px solid var(--high);
+        }
+
+        body.dark-mode .risk-item.high-priority {
+            background: #5a3a00;
+        }
+
+        .risk-item.medium-priority {
+            background: #e3f2fd;
+            border-left: 3px solid var(--medium);
+        }
+
+        body.dark-mode .risk-item.medium-priority {
+            background: #1a3a5a;
+        }
+
+        .risk-item.low-priority {
+            background: #e8f5e9;
+            border-left: 3px solid var(--low);
+        }
+
+        body.dark-mode .risk-item.low-priority {
+            background: #1a5a1a;
+        }
+
+        .risk-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .risk-info {
+            flex: 1;
+        }
+
+        .risk-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .risk-name label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .detail-btn {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 2px 8px;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .detail-btn:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .risk-detail-panel {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin-top: 8px;
+            font-size: 0.9em;
+            line-height: 1.6;
+            color: #333;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        body.dark-mode .risk-detail-panel {
+            background: #5a4a00;
+            border-left-color: #ffc107;
+            color: #ffe082;
+        }
+
+        .risk-detail-panel.visible {
+            display: block;
+        }
+
+        .priority-select {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .priority-select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .priority-low {
+            border-left: 3px solid var(--low);
+        }
+
+        .priority-medium {
+            border-left: 3px solid var(--medium);
+        }
+
+        .priority-high {
+            border-left: 3px solid var(--high);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .export-section {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        body.dark-mode .export-section {
+            background: #1a3a5a;
+        }
+
+        .print-button-area {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+            }
+
+            .button-group {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .button-group button {
+                flex: 1;
+            }
+
+            .category-tabs {
+                justify-content: flex-start;
+                overflow-x: auto;
+            }
+
+            .category-tab {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+        }
+
+        @media print {
+            .toolbar, .theme-toggle, .print-button-area {
+                display: none;
+            }
+
+            .content {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+    <div class="container">
+        <header>
+            <h1>🛡️ リスク管理ツール</h1>
+            <p>統合リスク評価システム - 日常生活・災害・サイバーセキュリティリスク</p>
+        </header>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="リスクを検索..." onkeyup="filterRisks()">
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" onclick="expandAll()">すべて展開</button>
+                <button class="btn-secondary" onclick="collapseAll()">すべて折りたたむ</button>
+                <button class="btn-success" onclick="exportData('csv')">CSV出力</button>
+                <button class="btn-warning" onclick="exportData('json')">JSON出力</button>
+                <button class="btn-danger" onclick="resetData()">リセット</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="filter-info" id="filterInfo"></div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="totalRisks">0</h3>
+                    <p>総リスク数</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="identifiedRisks">0</h3>
+                    <p>特定済みリスク</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="highSeverity">0</h3>
+                    <p>高リスク</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="mediumSeverity">0</h3>
+                    <p>中リスク</p>
+                </div>
+            </div>
+
+            <div class="export-section">
+                <h3>📊 リスク分析</h3>
+                <p>このツールを活用して、企業・個人の様々なリスクを体系的に管理・評価できます。</p>
+                <p style="margin-top: 10px; color: #666;">リスクをチェックして、優先度を設定し、対策を検討してください。</p>
+            </div>
+
+            <div id="categoryTabs" class="category-tabs"></div>
+            <div id="riskContainer"></div>
+
+            <div class="print-button-area">
+                <button class="btn-primary" onclick="window.print()">🖨️ このページを印刷</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 リスク管理ツール - 日常生活・災害・サイバーセキュリティリスク統合評価システム</p>
+            <p>このツールは定期的に更新・改善されます。ご意見・ご要望をお寄せください。</p>
+        </footer>
+    </div>
+
+    <script>
+        // リスク項目の詳細説明データ
+        const riskExplanations = {
+            "防犯・事件-侵入犯": {
+                "住宅への侵入盗窃": "窓や鍵の弱い玄関から侵入し、現金や電子機器を盗む犯罪。空き家や留守の家が狙われやすい。防犯ガラスや二重ロックの設置、防犯カメラの設置で大幅に軽減。近所の防犯意識向上も重要。",
+                "空き家狙い": "長期間無人の家を狙った盗難。壊れた家具や配線なども盗難対象に。空き家になる場合は、行政への届け出と近所への告知が有効。定期的な見回りを依頼することも可能。",
+                "窓からの侵入": "1階の窓が主なターゲット。脆い鍵や古い建具から侵入。防犯ガラスシート、補助錠、窓用警報器で対策。バルコニーのある2階も危険。つる植物で目隠しするのも有効。",
+                "ドア破り": "玄関ドアを工具で破壊して侵入。鍵が弱いと数秒で破られることも。ドア枠の強化、複合ロック設置、防犯カメラで軽減。日中でも鍵をかけることが重要。",
+                "合鍵使用": "元住人の合鍵や盗んだ合鍵で侵入。防犯性の高い鍵への交換が最重要。引越し時に鍵を必ず交換すること。",
+                "オートロック無視": "マンションのオートロックに続いて侵入する行為。セキュリティレベルが高いマンション選択が重要。"
+            },
+            "防犯・事件-対面犯": {
+                "強盗": "凶器を持った犯人が現金やカードを奪う。深夜帯が多く、目撃者が少ない場所が狙われやすい。ATMの深夜利用は避け、複数人での移動が安全。",
+                "痴漢": "混雑を利用して身体に接触する。防犯ブザー携帯、混雑車両乗車を避ける、声を上げることが有効。",
+                "盗撮": "スマートフォンなどで他者を許可なく撮影。プライバシー侵害。トイレはドアの隙間確認、駅では周囲警戒が必要。",
+                "不審者による直接接触": "面識のない者による声かけや無理やりの接触。帰宅ルートの変更、防犯ブザー携帯が有効。",
+                "ナンパによるトラブル": "軽いナンパが発展して強引な接触に。見知らぬ者への警戒心が必須。"
+            },
+            "防犯・事件-詐欺": {
+                "振り込め詐欺": "親族や警察になりすまして金銭送付を指示。高齢者が特に狙われやすい。一度電話を切って本人に確認することが最重要。",
+                "オレオレ詐欺": "子どもになりすまして親から金銭を引き出す。定期的な連絡と確認体制が重要。",
+                "キャッシュカード詐欺盗": "銀行員や警察になりすましてカードを回収。銀行員は決してカードを預けることはない。",
+                "フィッシング詐欺": "正規のウェブサイトに見せかけた偽サイト。公式サイトを直接訪問することが安全。",
+                "クレジットカード不正利用": "盗んだカード情報から不正購入。セキュリティコード、暗証番号の厳重管理が必須。"
+            }
+        };
+
+        // サブカテゴリーの説明データ
+        const categoryExplanations = {
+            "防犯・事件": {
+                "侵入犯": "窓やドアから住宅に侵入し、盗難・強盗を行う犯罪。防犯対策で大幅に軽減できます。",
+                "対面犯": "直接的な接触による犯罪。人目に付きやすい場所では抑止効果があります。",
+                "詐欺": "電話、メール、ウェブを利用した詐欺。教育と注意による予防が最も有効です。"
+            }
+        };
+
+        // リスク項目データ
+        const riskData = {
+            "防犯・事件": {
+                "侵入犯": [
+                    { name: "住宅への侵入盗窃", priority: "低" },
+                    { name: "空き家狙い", priority: "低" },
+                    { name: "窓からの侵入", priority: "中" },
+                    { name: "ドア破り", priority: "高" },
+                    { name: "合鍵使用", priority: "中" },
+                    { name: "オートロック無視", priority: "中" }
+                ],
+                "対面犯": [
+                    { name: "強盗", priority: "高" },
+                    { name: "痴漢", priority: "中" },
+                    { name: "盗撮", priority: "低" },
+                    { name: "不審者による直接接触", priority: "高" },
+                    { name: "ナンパによるトラブル", priority: "低" }
+                ],
+                "詐欺": [
+                    { name: "振り込め詐欺", priority: "高" },
+                    { name: "オレオレ詐欺", priority: "高" },
+                    { name: "キャッシュカード詐欺盗", priority: "高" },
+                    { name: "フィッシング詐欺", priority: "中" },
+                    { name: "クレジットカード不正利用", priority: "中" }
+                ]
+            }
+        };
+
+        let currentCategory = null;
+        let riskState = {};
+
+        function init() {
+            loadState();
+            renderCategories();
+            selectCategory(Object.keys(riskData)[0]);
+            updateStats();
+        }
+
+        function renderCategories() {
+            const tabsContainer = document.getElementById('categoryTabs');
+            tabsContainer.innerHTML = '';
+            Object.keys(riskData).forEach(category => {
+                const btn = document.createElement('button');
+                btn.className = 'category-tab';
+                btn.textContent = category;
+                btn.onclick = () => selectCategory(category);
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        function selectCategory(category) {
+            currentCategory = category;
+            const tabs = document.querySelectorAll('.category-tab');
+            tabs.forEach(tab => {
+                if (tab.textContent.trim() === category) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            renderRisks(category);
+        }
+
+        function renderRisks(category) {
+            const container = document.getElementById('riskContainer');
+            container.innerHTML = '';
+
+            const categoryData = riskData[category] || {};
+            
+            Object.entries(categoryData).forEach(([subcategory, risks]) => {
+                const group = document.createElement('div');
+                group.className = 'subcategory-group';
+
+                const header = document.createElement('div');
+                header.className = 'subcategory-header';
+                header.innerHTML = `
+                    <div>
+                        <strong>${subcategory}</strong>
+                        <span style="color: #999; margin-left: 10px;">${risks.length}項目</span>
+                    </div>
+                    <span>▼</span>
+                `;
+                header.onclick = () => toggleSubcategory(header);
+
+                const content = document.createElement('div');
+                content.className = 'subcategory-content';
+
+                if (categoryExplanations[category]?.[subcategory]) {
+                    const explanation = document.createElement('div');
+                    explanation.className = 'subcategory-explanation';
+                    explanation.innerHTML = `<strong>ℹ️ 解説:</strong> ${categoryExplanations[category][subcategory]}`;
+                    content.appendChild(explanation);
+                }
+
+                risks.forEach(risk => {
+                    const riskId = `${category}-${subcategory}-${risk.name}`;
+                    const item = document.createElement('div');
+                    item.className = `risk-item ${risk.priority}-priority`;
+                    if (riskState[riskId]?.checked) {
+                        item.className += ' checked';
+                    }
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'risk-checkbox';
+                    checkbox.id = riskId;
+                    checkbox.checked = riskState[riskId]?.checked || false;
+                    checkbox.onchange = () => toggleRisk(riskId, checkbox.checked, risk.priority);
+
+                    const label = document.createElement('label');
+                    label.htmlFor = riskId;
+                    label.textContent = risk.name;
+
+                    const riskName = document.createElement('div');
+                    riskName.className = 'risk-name';
+                    riskName.appendChild(checkbox);
+                    riskName.appendChild(label);
+
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'risk-info';
+
+                    const prioritySelect = document.createElement('select');
+                    prioritySelect.className = `priority-select priority-${risk.priority.toLowerCase()}`;
+                    prioritySelect.value = riskState[riskId]?.priority || risk.priority;
+                    ['低', '中', '高'].forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p;
+                        opt.textContent = p + 'リスク';
+                        prioritySelect.appendChild(opt);
+                    });
+                    prioritySelect.onchange = () => updatePriority(riskId, prioritySelect.value);
+
+                    const detailBtn = document.createElement('button');
+                    detailBtn.className = 'detail-btn';
+                    detailBtn.innerHTML = '💡';
+                    detailBtn.onclick = (e) => {
+                        e.preventDefault();
+                        toggleDetail(detailBtn, riskId, category, subcategory, risk.name);
+                    };
+
+                    riskName.appendChild(prioritySelect);
+                    riskName.appendChild(detailBtn);
+
+                    infoDiv.appendChild(riskName);
+
+                    const detailPanel = document.createElement('div');
+                    detailPanel.className = 'risk-detail-panel';
+                    const explanation = getRiskExplanation(category, subcategory, risk.name);
+                    detailPanel.innerHTML = explanation || 'この項目の詳細説明はまだ登録されていません。';
+                    infoDiv.appendChild(detailPanel);
+
+                    item.appendChild(infoDiv);
+                    content.appendChild(item);
+                });
+
+                group.appendChild(header);
+                group.appendChild(content);
+                container.appendChild(group);
+            });
+        }
+
+        function toggleSubcategory(header) {
+            const content = header.nextElementSibling;
+            header.classList.toggle('expanded');
+            content.classList.toggle('open');
+        }
+
+        function toggleRisk(riskId, checked, priority) {
+            if (!riskState[riskId]) {
+                riskState[riskId] = {};
+            }
+            riskState[riskId].checked = checked;
+            riskState[riskId].priority = priority;
+            saveState();
+            updateStats();
+        }
+
+        function updatePriority(riskId, priority) {
+            if (!riskState[riskId]) {
+                riskState[riskId] = {};
+            }
+            riskState[riskId].priority = priority;
+            const select = document.querySelector(`[id="${riskId}"]`)?.parentElement?.querySelector('select');
+            if (select) {
+                select.className = `priority-select priority-${priority.toLowerCase()}`;
+            }
+            saveState();
+            updateStats();
+        }
+
+        function toggleDetail(btn, riskId, category, subcategory, riskName) {
+            const panel = btn.parentElement?.parentElement?.querySelector('.risk-detail-panel');
+            if (panel) {
+                panel.classList.toggle('visible');
+            }
+        }
+
+        function getRiskExplanation(category, subcategory, risk) {
+            const key = `${category}-${subcategory}`;
+            return riskExplanations[key]?.[risk] || null;
+        }
+
+        function updateStats() {
+            let total = 0, identified = 0, high = 0, medium = 0;
+
+            Object.values(riskData).forEach(categoryData => {
+                Object.values(categoryData).forEach(risks => {
+                    total += risks.length;
+                });
+            });
+
+            Object.entries(riskState).forEach(([id, state]) => {
+                if (state.checked) {
+                    identified++;
+                    if (state.priority === '高') high++;
+                    if (state.priority === '中') medium++;
+                }
+            });
+
+            document.getElementById('totalRisks').textContent = total;
+            document.getElementById('identifiedRisks').textContent = identified;
+            document.getElementById('highSeverity').textContent = high;
+            document.getElementById('mediumSeverity').textContent = medium;
+        }
+
+        function expandAll() {
+            document.querySelectorAll('.subcategory-header').forEach(header => {
+                header.classList.add('expanded');
+                header.nextElementSibling?.classList.add('open');
+            });
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('.subcategory-header').forEach(header => {
+                header.classList.remove('expanded');
+                header.nextElementSibling?.classList.remove('open');
+            });
+        }
+
+        function exportData(format) {
+            if (format === 'csv') {
+                let csv = 'カテゴリー,サブカテゴリー,リスク項目,チェック状態,優先度\n';
+                Object.entries(riskData).forEach(([category, categoryData]) => {
+                    Object.entries(categoryData).forEach(([subcategory, risks]) => {
+                        risks.forEach(risk => {
+                            const riskId = `${category}-${subcategory}-${risk.name}`;
+                            const state = riskState[riskId];
+                            const checked = state?.checked ? '✓' : '';
+                            const priority = state?.priority || risk.priority;
+                            csv += `"${category}","${subcategory}","${risk.name}","${checked}","${priority}"\n`;
+                        });
+                    });
+                });
+                downloadFile(csv, 'risk_management.csv', 'text/csv');
+            } else if (format === 'json') {
+                const jsonData = {
+                    exportDate: new Date().toISOString(),
+                    riskState: riskState,
+                    statistics: {
+                        totalRisks: document.getElementById('totalRisks').textContent,
+                        identifiedRisks: document.getElementById('identifiedRisks').textContent,
+                        highRisks: document.getElementById('highSeverity').textContent,
+                        mediumRisks: document.getElementById('mediumSeverity').textContent
+                    }
+                };
+                downloadFile(JSON.stringify(jsonData, null, 2), 'risk_management.json', 'application/json');
+            }
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function filterRisks() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.risk-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function resetData() {
+            if (confirm('すべてのデータをリセットしてもよろしいですか？')) {
+                riskState = {};
+                localStorage.removeItem('riskState');
+                renderRisks(currentCategory);
+                updateStats();
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        function saveState() {
+            localStorage.setItem('riskState', JSON.stringify(riskState));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('riskState');
+            if (saved) {
+                riskState = JSON.parse(saved);
+            }
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
